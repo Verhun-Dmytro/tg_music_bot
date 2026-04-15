@@ -1,7 +1,7 @@
 from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery
-from handlers.callbacks import generated_inline_keyboard
+from .callbacks import generated_inline_keyboard
 from database.db import search_user_and_add
 from services.music_services import search_music_ytdlp, clip_music
 
@@ -39,7 +39,7 @@ async def start_search_music(message: types.Message):
 
         if len(list_music) > 0:
                  
-            await message.answer("Обирай пісню:", reply_markup=generated_inline_keyboard())
+            await message.answer("Обирай пісню:", reply_markup=generated_inline_keyboard(list_music))
     except:
         print("Проблема! Щось пішло не так з пошуком музики!")
         await message.answer("Пробач, щось пішло не так, ми вже працюємо над цим.")
