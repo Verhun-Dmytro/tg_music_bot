@@ -1,0 +1,7 @@
+# Automatically created by ruff.
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.cpython-*
+*.db 
