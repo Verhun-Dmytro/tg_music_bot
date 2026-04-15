@@ -1,7 +1,11 @@
-# Automatically created by ruff.
+# Env files
 .env
+
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.cpython-*
-*.db 
+
+# Databases
+*.db
