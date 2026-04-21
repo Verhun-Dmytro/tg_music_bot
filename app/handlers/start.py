@@ -1,9 +1,11 @@
 from aiogram import Router, types, F
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from .callbacks import generated_inline_keyboard
 from database.db import search_user_and_add
 from services.music_services import search_music_ytdlp, clip_music
+from services.dowloader import dowload_music, delete_music, convert_video_to_audio
 
 
 router = Router()
@@ -40,12 +42,34 @@ async def start_search_music(message: types.Message):
         if len(list_music) > 0:
                  
             await message.answer("Обирай пісню:", reply_markup=generated_inline_keyboard(list_music))
-    except:
-        print("Проблема! Щось пішло не так з пошуком музики!")
+    except Exception as e:
+        print(f"Error! {e}")
         await message.answer("Пробач, щось пішло не так, ми вже працюємо над цим.")
 
 
 @router.callback_query()
 async def handle_button_music(callback: CallbackQuery):
-    await callback.message.edit_reply_markup(reply_markup=None)
-    await callback.message.delete()
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+        await callback.message.delete()
+
+        music_pl = dowload_music(callback.data)
+        audio = convert_video_to_audio(music_pl)
+
+        if not audio:
+            raise ValueError("Audio not created")
+
+        audio_send = FSInputFile(audio)
+
+        await callback.message.answer_audio(audio=audio_send)
+
+        delete_music(music_pl["output"])
+        delete_music(audio)
+
+    except (TelegramBadRequest, TelegramForbiddenError) as e:
+        print(f"Telegram error: {e}")
+        await callback.answer("Проблема з Telegram повідомленням")
+
+    except Exception as e:
+        print(f"General error: {e}")
+        await callback.answer("Не вдалося обробити аудіо. Спробуйте ще раз.")
