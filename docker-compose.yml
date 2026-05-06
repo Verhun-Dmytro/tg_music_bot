@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  music_bot:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - sqlite_data:/app/data
+    env_file:
+      - .env
+
+volumes:
+  sqlite_data:
