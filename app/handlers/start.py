@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from .callbacks import generated_inline_keyboard
-from database.db import search_user_and_add
+from database.db import search_user_and_add, add_music_list
 from services.music_services import search_music_ytdlp, clip_music
 from services.dowloader import dowload_music, delete_music, convert_video_to_audio
 
@@ -15,21 +15,21 @@ router = Router()
 async def start(message: types.Message):
     user = search_user_and_add(message.from_user.id, message.from_user.username)
     await message.answer(
-        f"Привіт {message.from_user.full_name}! Я, бот по пошуку музики, напиши назву пісні або виконавця, а я знайду його пісні! Якщо щось забудеш використовуй команду /help"
+        f"Привіт {message.from_user.full_name}! Я бот по пошуку музики, напиши назву пісні або виконавця, а я знайду його пісні! Якщо щось забудеш використовуй команду /help"
     )
 
 
 @router.message(Command("help"))
 async def help(message: types.Message):
     await message.answer(
-        f"Ой лялечко, забув як користуватись? Я, бот по пошуку музики, напиши назву пісні або виконавця, а я знайду його пісні!"
+        f"Ой лялечко, забув як користуватись? Я бот по пошуку музики, напиши назву пісні або виконавця, а я знайду його пісні!"
     )
 
 
 @router.message(F.text.startswith("/"))
 async def help(message: types.Message):
     await message.answer(
-        f"Ой лялечко, забув як користуватись? Я, бот по пошуку музики, напиши назву пісні або виконавця, а я знайду його пісні!"
+        f"Ой лялечко, забув як користуватись? Я бот по пошуку музики, напиши назву пісні або виконавця, а я знайду його пісні!"
     )
 
 
@@ -62,6 +62,8 @@ async def handle_button_music(callback: CallbackQuery):
         audio_send = FSInputFile(audio)
 
         await callback.message.answer_audio(audio=audio_send)
+
+        add_music_list(callback.from_user.id, music_pl["filename"])
 
         delete_music(music_pl["output"])
         delete_music(audio)

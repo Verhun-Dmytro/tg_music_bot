@@ -1,31 +1,27 @@
 import sqlite3
+import os
+from config import DB_PATH
 
-connect_db = sqlite3.connect("music_users.db")
-cursor_db = connect_db.cursor()
+#DB_PATH = "music_users.db"
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 
 # Create table and DB #
-
-cursor_db.execute("PRAGMA foreign_keys = ON")
-
-cursor_db.execute("""
-    CREATE TABLE IF NOT EXISTS  users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name_id INTEGER NOT NULL,
-        url_name_id TEXT,
-        time TEXT                      
-                  )
-
-""")
-
-cursor_db.execute("""
-    CREATE TABLE IF NOT EXISTS  music (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        name_music TEXT,
-        FOREIGN KEY (user_id) REFERENCES users(id)                      
-                  )
-
-""")
-
-connect_db.commit()
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.executescript("""
+        CREATE TABLE IF NOT EXISTS  users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name_id INTEGER UNIQUE NOT NULL,
+            url_name_id TEXT,
+            time TEXT                      
+                   );
+        CREATE TABLE IF NOT EXISTS  music (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            name_music TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)                      
+                    );
+    """)
+        print("DB READY!")

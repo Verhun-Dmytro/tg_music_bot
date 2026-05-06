@@ -2,3 +2,4 @@ aiogram
 yt_dlp
 dotenv
 pathlib
+moviepy
